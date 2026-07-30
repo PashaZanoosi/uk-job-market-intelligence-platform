@@ -42,7 +42,7 @@ jobs:
           echo '${{ secrets.GOOGLE_TOKEN_PICKLE }}' >> $GITHUB_ENV
           echo 'EOF' >> $GITHUB_ENV
 
-            - name: Telegram Start Notification
+       - name: Telegram Start Notification
         run: |
           python -c "
           from src.utils.telegram_alert import send_message
