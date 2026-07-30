@@ -154,166 +154,6 @@ def get_jobs_for_processing(limit=500):
 
         return result.fetchall()
 
-# ==========================
-# AI Extraction Batch
-# ==========================
-
-def extract_skills_batch(
-    jobs
-):
-    job_text = ""
-
-    for job in jobs:
-
-        description = (
-
-            job.description
-
-            or ""
-
-        )
-
-        job_text += f"""
-
-JOB_ID:
-{job.job_id}
-
-DESCRIPTION:
-{description[:MAX_DESCRIPTION_LENGTH]}
-
----------------------
-
-"""
-
-
-    system_prompt = """
-
-You are extracting professional skills
-from UK job descriptions.
-
-For each job:
-
-Return only skills explicitly required
-or clearly mentioned.
-
-Rules:
-
-- Extract 2 to 5 skills per job.
-- Use standard professional skill names.
-- Avoid generic phrases.
-- Do not infer skills from job title only.
-
-Use one of these categories:
-
-Technical
-Business
-Methodology
-Domain
-Soft Skill
-
-Confidence:
-1.0 = explicitly mentioned
-0.7 = strongly implied
-0.5 = weakly implied
-
-Return JSON only.
-Format:
-{
-    "jobs": [
-        {
-            "job_id": "123",
-            "skills": [
-                {
-                    "name": "Skill",
-                    "category": "Technical",
-                    "confidence": 0.9
-                }
-            ]
-        }
-    ]
-}
-
-Do not return markdown.
-Do not add explanations.
-
-"""
-    print(
-        "Sending batch to Groq...",
-        flush=True
-    )
-
-    request_start = datetime.now()
-    response = (
-        client.chat.completions.create(
-            model=MODEL_NAME,
-            messages=[
-                {
-                    "role": "system",
-                    "content": system_prompt
-                },
-
-                {
-                    "role": "user",
-                    "content": job_text
-                }
-            ],
-
-            temperature=TEMPERATURE,
-
-            response_format={
-                "type": "json_object"
-            }
-        )
-    )
-
-    request_duration = (
-        datetime.now()
-
-        -
-
-        request_start
-    )
-
-    print(
-        "Groq response received.",
-        flush=True
-    )
-
-    print(
-
-        f"Groq request time: "
-        f"{request_duration}",
-
-        flush=True
-
-    )
-
-
-    content = (
-
-        response
-
-        .choices[0]
-
-        .message
-
-        .content
-
-    )
-
-
-    return json.loads(
-
-        clean_json_response(
-
-            content
-
-        )
-
-    )
-
-
-
 
 # ==========================
 # Save Extracted Skills
@@ -496,8 +336,6 @@ def save_job_skill(
 
 
 
-
-
 # ==========================
 # Batch Skill Extraction
 # ==========================
@@ -534,32 +372,37 @@ DESCRIPTION:
 
     prompt = f"""
 
-You are extracting professional skills from multiple UK job descriptions.
+You are extracting professional skills from UK job descriptions for a labour market intelligence database.
 
 For each job:
 
-Return only skills explicitly required or clearly mentioned.
+Extract skills only when the job description contains clear evidence.
 
-Rules:
+Important:
+Do not extract a skill because the employee works with other people.
+Do not extract Team Management unless the description mentions managing, supervising, leading, coaching, or allocating work to others.
+Do not extract Leadership unless the role has responsibility for people, decisions, or direction.
+Do not extract Project Management unless the description mentions projects, project delivery, project coordination, or project planning.
 
-- Extract 2-5 skills per job.
-- Use standard professional skill names.
-- Avoid generic phrases.
-- Do not infer from job title only.
-- Categorise each skill:
+Strict rules:
+- Do not infer skills from the job title.
+- Common soft skills like communication and teamwork should only be extracted when the description clearly mentions interaction, collaboration, customer interaction, or team working.
+- Do not add leadership, management, strategy, project management, or planning skills unless they are explicitly required.
+- Do not force a minimum number of skills.
+- Return an empty skills list if no clear skills are found.
+- Prefer accuracy over quantity.
+- Avoid assigning leadership or management skills to non-supervisory roles.
 
-Technical
-Business
-Methodology
-Domain
-Soft Skill
+Skill categories:
+- Technical
+- Business
+- Methodology
+- Domain
+- Soft Skill
 
 Confidence:
-
-1.0 explicit
-0.7 strongly implied
-0.5 weak
-
+- 1.0 = explicitly mentioned
+- 0.8 = clearly required from responsibilities
 
 Return JSON only.
 
