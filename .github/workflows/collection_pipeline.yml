@@ -42,11 +42,12 @@ jobs:
           echo '${{ secrets.GOOGLE_TOKEN_PICKLE }}' >> $GITHUB_ENV
           echo 'EOF' >> $GITHUB_ENV
 
-       - name: Telegram Start Notification
+      - name: Telegram Start Notification
         run: |
           python -c "
           from src.utils.telegram_alert import send_message
-          send_message('🚀 Daily Adzuna collection started')"
+          send_message('🚀 Daily Adzuna collection started')
+          "
 
       - name: Run Collection
         run: |
@@ -57,15 +58,16 @@ jobs:
         run: |
           python -c "
           from src.utils.telegram_alert import send_message
-          send_message('✅ Daily Adzuna collection completed successfully')"
+          send_message('✅ Daily Adzuna collection completed successfully')
+          "
 
       - name: Telegram Failure Notification
         if: failure()
         run: |
           python -c "
           from src.utils.telegram_alert import send_message
-          send_message('❌ Daily Adzuna collection failed. Check GitHub Actions logs.')"
-
+          send_message('❌ Daily Adzuna collection failed. Check GitHub Actions logs.')
+          "
 
 
 
