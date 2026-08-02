@@ -30,8 +30,8 @@ client = Groq(
 # =====================================================
 
 MODEL_NAME = "llama-3.1-8b-instant"
-BATCH_SIZE = 15
-MAX_DESCRIPTION_LENGTH = 1200
+BATCH_SIZE = 10
+MAX_DESCRIPTION_LENGTH = 3000
 MAX_RETRIES = 3
 RETRY_DELAYS = [
     60,
@@ -344,9 +344,7 @@ def extract_skills_batch(
     jobs
 ):
 
-
     job_text = ""
-
 
     for job in jobs:
 
@@ -354,7 +352,6 @@ def extract_skills_batch(
             job.description
             or ""
         )
-
 
         job_text += f"""
 
@@ -369,63 +366,213 @@ DESCRIPTION:
 """
 
 
+    system_prompt = """
 
-    prompt = f"""
+You are an expert UK job market analyst.
 
-You are extracting professional skills from UK job descriptions for a labour market intelligence database.
+Your task is to extract ONLY explicit professional skills from UK job descriptions.
 
-For each job:
+STRICT RULES:
 
-Extract skills only when the job description contains clear evidence.
+1. Extract a skill only if:
+- The skill name appears directly in the job description.
+- OR the job description clearly requires the skill through a specific responsibility.
 
-Important:
-Do not extract a skill because the employee works with other people.
-Do not extract Team Management unless the description mentions managing, supervising, leading, coaching, or allocating work to others.
-Do not extract Leadership unless the role has responsibility for people, decisions, or direction.
-Do not extract Project Management unless the description mentions projects, project delivery, project coordination, or project planning.
+2. NEVER extract skills based on:
+- Job title only.
+- Common expectations of the occupation.
+- Generic assumptions.
 
-Strict rules:
-- Do not infer skills from the job title.
-- Common soft skills like communication and teamwork should only be extracted when the description clearly mentions interaction, collaboration, customer interaction, or team working.
-- Do not add leadership, management, strategy, project management, or planning skills unless they are explicitly required.
-- Do not force a minimum number of skills.
-- Return an empty skills list if no clear skills are found.
-- Prefer accuracy over quantity.
-- Avoid assigning leadership or management skills to non-supervisory roles.
+Examples of forbidden inference:
 
-Skill categories:
-- Technical
-- Business
-- Methodology
-- Domain
-- Soft Skill
+Job:
+"Teaching Assistant"
 
-Confidence:
-- 1.0 = explicitly mentioned
-- 0.8 = clearly required from responsibilities
+Do NOT extract:
+- Communication
+- Teamwork
+- Leadership
+
+Unless the description explicitly says:
+"excellent communication skills"
+"work collaboratively within a team"
+"lead staff"
+
+---
+
+3. Generic soft skills:
+
+Only extract these if explicitly mentioned:
+
+Allowed:
+- Communication
+- Teamwork
+- Leadership
+- Problem Solving
+- Time Management
+- Stakeholder Management
+- Customer Service
+
+Examples:
+
+"excellent communication skills required"
+=> Communication
+
+"work effectively as part of a team"
+=> Teamwork
+
+"manage stakeholders"
+=> Stakeholder Management
+
+"lead a team of employees"
+=> Leadership
+
+
+Do NOT extract:
+
+"work with colleagues"
+=> no Teamwork
+
+"support customers"
+=> no Customer Service
+
+"responsible role"
+=> no Leadership
+
+
+---
+
+4. Management skills:
+
+Extract only when explicitly stated:
+
+Leadership:
+- lead a team
+- provide leadership
+- manage leaders
+
+Team Management:
+- manage staff
+- supervise employees
+- line management responsibility
+
+Project Management:
+- manage projects
+- deliver projects
+- project manager responsibility
+
+Strategic Planning:
+- strategic planning
+- develop strategy
+- business strategy
+
+
+Do NOT infer management skills from:
+- Senior
+- Manager title
+- Head of
+- Lead title
+
+
+---
+
+5. Technical skills:
+
+Extract only named tools, technologies, systems, methods, certifications, or technical knowledge.
+
+Examples:
+
+"Power BI experience required"
+=> Power BI
+
+"SQL knowledge"
+=> SQL
+
+"Microsoft Office"
+=> Microsoft Office
+
+"Python programming"
+=> Python
+
+
+Do NOT create broad skills:
+
+"uses digital systems"
+=> no Digital Skills
+
+"works with data"
+=> no Data Analysis
+
+
+---
+
+6. Categories:
+
+Use ONLY these categories:
+
+Technical:
+Tools, software, technologies, certifications, technical procedures.
+
+Business:
+Business functions, commercial skills, finance, sales, operations.
+
+Methodology:
+Frameworks, methods, processes.
+
+Domain:
+Industry-specific knowledge.
+
+Soft Skill:
+Human skills explicitly mentioned.
+
+
+---
+
+7. Confidence score:
+
+1.0:
+Skill directly mentioned.
+
+0.8:
+Skill is clearly required by a responsibility.
+
+Never use confidence below 0.8.
+
+
+---
+
+8. Output rules:
 
 Return JSON only.
 
+Do not add explanations.
+
+Do not include duplicate skills.
+
+Normalize similar skills:
+
+"Microsoft Packages" -> "Microsoft Office"
+
+"Communication skills" -> "Communication"
+
+
 Format:
 
-{{
+{
  "jobs":[
-
-  {{
-   "job_id":"123",
-   "skills":[
-
-    {{
-     "name":"Skill",
-     "category":"Category",
-     "confidence":0.9
-    }}
-
-   ]
-  }}
-
+   {
+    "job_id":"123",
+    "skills":[
+      {
+       "name":"Skill Name",
+       "category":"Category",
+       "confidence":1.0
+      }
+    ]
+   }
  ]
-}}
+}
+
 
 Jobs:
 
@@ -436,13 +583,18 @@ Jobs:
 
     response = client.chat.completions.create(
 
-        model="llama-3.1-8b-instant",
+        model=MODEL_NAME,
 
         messages=[
 
             {
-                "role":"system",
-                "content":prompt
+                "role": "system",
+                "content": system_prompt
+            },
+
+            {
+                "role": "user",
+                "content": job_text
             }
 
         ],
@@ -450,7 +602,7 @@ Jobs:
         temperature=TEMPERATURE,
 
         response_format={
-            "type":"json_object"
+            "type": "json_object"
         }
 
     )
@@ -1053,7 +1205,7 @@ def main():
 
     # Number of jobs to process
 
-    JOB_LIMIT = 500
+    JOB_LIMIT = 10
 
 
 

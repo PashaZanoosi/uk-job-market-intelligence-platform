@@ -16,7 +16,7 @@ from googleapiclient.http import (
 # Config
 # ==========================
 
-LOCAL_CLIENT_SECRET = r"C:\Users\Pasha\Desktop\Downloads\client_secret.json"
+LOCAL_CLIENT_SECRET = r"C:\Scientific\23 Job Applications\Portfolio Projects\client_secret.json"
 
 CLIENT_SECRET_FILE = "client_secret.json"
 
