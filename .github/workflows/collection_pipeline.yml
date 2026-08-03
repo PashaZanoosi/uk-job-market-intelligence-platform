@@ -107,4 +107,5 @@ jobs:
           python -c "
           from src.utils.telegram_alert import send_message
           send_message('❌ Loading jobs into Neon failed. Check GitHub Actions logs.')
-          "
+
+
