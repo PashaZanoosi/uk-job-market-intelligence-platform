@@ -313,3 +313,61 @@ def upload_parquet(df, filename="uk_jobs_master.parquet"):
         local_path,
         filename
     )
+
+def download_parquet_dataframe(filename="uk_jobs_master.parquet"):
+
+    service = get_drive_service()
+
+    query = (
+        f"'{FOLDER_ID}' in parents "
+        f"and name='{filename}' "
+        f"and trashed=false"
+    )
+
+    result = service.files().list(
+        q=query,
+        fields="files(id,name)"
+    ).execute()
+
+    files = result.get(
+        "files",
+        []
+    )
+
+    if not files:
+        return None
+
+
+    file_id = files[0]["id"]
+
+
+    request = service.files().get_media(
+        fileId=file_id
+    )
+
+
+    import io
+
+    buffer = io.BytesIO()
+
+
+    downloader = MediaIoBaseDownload(
+        buffer,
+        request
+    )
+
+
+    done = False
+
+
+    while not done:
+
+        status, done = downloader.next_chunk()
+
+
+    buffer.seek(0)
+
+
+    return pd.read_parquet(
+        buffer
+    )

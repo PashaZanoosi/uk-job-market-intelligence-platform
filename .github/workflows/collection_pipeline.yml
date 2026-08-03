@@ -6,26 +6,32 @@ on:
   schedule:
     - cron: "0 6 * * *"
 
+
 jobs:
 
   collect:
 
     runs-on: ubuntu-latest
 
+
     steps:
+
 
       - name: Checkout
         uses: actions/checkout@v4
+
 
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
 
+
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
+
 
       - name: Create .env
         run: |
@@ -33,6 +39,8 @@ jobs:
           echo "ADZUNA_APP_KEY=${{ secrets.ADZUNA_APP_KEY }}" >> .env
           echo "TELEGRAM_BOT_TOKEN=${{ secrets.TELEGRAM_BOT_TOKEN }}" >> .env
           echo "TELEGRAM_CHAT_ID=${{ secrets.TELEGRAM_CHAT_ID }}" >> .env
+          echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" >> .env
+
 
       - name: Export Google Secrets
         run: |
@@ -44,6 +52,7 @@ jobs:
           echo '${{ secrets.GOOGLE_TOKEN_PICKLE }}' >> $GITHUB_ENV
           echo 'EOF' >> $GITHUB_ENV
 
+
       - name: Telegram Start Notification
         run: |
           python -c "
@@ -51,26 +60,51 @@ jobs:
           send_message('🚀 Daily Adzuna collection started')
           "
 
+
       - name: Run Collection
         run: |
           python run_collection_pipeline.py
 
-      - name: Telegram Success Notification
+
+      - name: Telegram Collection Success Notification
         if: success()
         run: |
           python -c "
           from src.utils.telegram_alert import send_message
-          send_message('✅ Daily Adzuna collection completed successfully')
+          send_message('✅ Adzuna collection completed successfully')
           "
 
-      - name: Telegram Failure Notification
+
+      - name: Telegram Collection Failure Notification
         if: failure()
         run: |
           python -c "
           from src.utils.telegram_alert import send_message
-          send_message('❌ Daily Adzuna collection failed. Check GitHub Actions logs.')
+          send_message('❌ Adzuna collection failed. Check GitHub Actions logs.')
           "
 
 
+      - name: Load Jobs Into Neon
+        run: |
+          python -c "
+          from src.data.load_master_parquet import main
+          main()
+          "
 
 
+      - name: Telegram Neon Load Success Notification
+        if: success()
+        run: |
+          python -c "
+          from src.utils.telegram_alert import send_message
+          send_message('✅ Jobs loaded into Neon successfully')
+          "
+
+
+      - name: Telegram Neon Load Failure Notification
+        if: failure()
+        run: |
+          python -c "
+          from src.utils.telegram_alert import send_message
+          send_message('❌ Loading jobs into Neon failed. Check GitHub Actions logs.')
+          "
