@@ -1,7 +1,7 @@
 from src.skills.skill_pipeline import run_skill_pipeline
 
 
-BATCH_SIZE = 10
+BATCH_SIZE = 50
 
 
 def start_worker():
