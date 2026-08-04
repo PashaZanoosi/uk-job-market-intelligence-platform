@@ -36,6 +36,7 @@ jobs:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
           BATCH_SIZE: 10
+          PYTHONPATH: .
 
         run: |
           python src/skills/skill_worker.py
