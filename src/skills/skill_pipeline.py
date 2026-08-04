@@ -413,9 +413,9 @@ def run_skill_pipeline( batch_size=50, max_workers=5
 
     )
 
-    print("=" * 60)
+    print("=" * 20)
     print("SKILL PIPELINE FINISHED")
-    print("=" * 60)
+    print("=" * 20)
 
     with engine.connect() as conn:
 

@@ -10,9 +10,9 @@ def start_worker():
         batch_size=BATCH_SIZE
     )
 
-    print("=" * 50)
+    print("=" * 20)
     print("SKILL WORKER REPORT")
-    print("=" * 50)
+    print("=" * 20)
 
     print(f"Processed : {result['processed']}")
     print(f"Completed : {result['completed']}")
