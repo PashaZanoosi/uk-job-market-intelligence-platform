@@ -6,6 +6,9 @@ on:
 
   workflow_dispatch:
 
+concurrency:
+  group: skill-worker
+  cancel-in-progress: false
 
 jobs:
 
@@ -35,7 +38,7 @@ jobs:
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
-          BATCH_SIZE: 10
+          BATCH_SIZE: 20
           PYTHONPATH: .
 
         run: |
