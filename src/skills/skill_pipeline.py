@@ -281,14 +281,8 @@ def process_job(job):
 # =====================================================
 
 
-def run_skill_pipeline(
-
-    batch_size=50,
-
-    max_workers=5
-
-):
-
+def run_skill_pipeline( batch_size=50, max_workers=5 
+    ):
 
     print("=" * 60)
 
@@ -419,19 +413,15 @@ def run_skill_pipeline(
 
     )
 
-
-
+    print("=" * 60)
+    print("SKILL PIPELINE FINISHED")
     print("=" * 60)
 
-    print(
-        "SKILL PIPELINE FINISHED"
-    )
-
     return {
-    "success": success,
-    "failed": failed,
-    "processed": len(jobs)
-    }
+        "success": success,
+        "failed": failed,
+        "processed": success + failed
+}
 
 
 

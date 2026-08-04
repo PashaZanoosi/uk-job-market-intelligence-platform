@@ -1,16 +1,6 @@
-# src/skills/skill_worker.py
-
-import os
-
 from src.skills.skill_pipeline import run_skill_pipeline
 
-
-BATCH_SIZE = int(
-    os.getenv(
-        "BATCH_SIZE",
-        10
-    )
-)
+BATCH_SIZE = 10
 
 
 def start_worker():
@@ -29,8 +19,8 @@ def start_worker():
     print("SKILL WORKER FINISHED")
     print("=" * 60)
 
+    return result
 
 
 if __name__ == "__main__":
-
     start_worker()

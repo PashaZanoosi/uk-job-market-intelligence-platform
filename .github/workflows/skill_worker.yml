@@ -6,15 +6,13 @@ on:
 
   workflow_dispatch:
 
-concurrency:
-  group: skill-worker
-  cancel-in-progress: false
 
 jobs:
 
   skill-worker:
 
     runs-on: ubuntu-latest
+
 
     steps:
 
@@ -38,21 +36,27 @@ jobs:
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
-          BATCH_SIZE: 20
-          PYTHONPATH: .
 
         run: |
-          python src/skills/skill_worker.py
+          python src/skills/skill_worker.py > worker_output.txt
+
 
       - name: Send Telegram notification
         if: always()
+
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
 
         run: |
+
+          MESSAGE=$(tail -30 worker_output.txt)
+
+
           curl -s \
           -X POST \
-          https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage \
+          "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
           -d chat_id=${TELEGRAM_CHAT_ID} \
-          -d text="Skill worker finished running on GitHub Actions"
+          -d text="Skill Worker Report:
+
+${MESSAGE}"
