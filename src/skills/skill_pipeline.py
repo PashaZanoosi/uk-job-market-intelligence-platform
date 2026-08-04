@@ -417,11 +417,27 @@ def run_skill_pipeline( batch_size=50, max_workers=5
     print("SKILL PIPELINE FINISHED")
     print("=" * 60)
 
+    with engine.connect() as conn:
+
+        pending = conn.execute(text("""
+            SELECT COUNT(*)
+            FROM jobs
+            WHERE skills_extraction_status='pending'
+        """)).scalar()
+
+        unavailable = conn.execute(text("""
+            SELECT COUNT(*)
+            FROM jobs
+            WHERE skills_extraction_status='unavailable'
+        """)).scalar()
+
     return {
-        "success": success,
+        "processed": success + failed,
+        "completed": success,
         "failed": failed,
-        "processed": success + failed
-}
+        "unavailable": unavailable,
+        "pending": pending
+    }
 
 
 

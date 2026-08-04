@@ -1,23 +1,26 @@
 from src.skills.skill_pipeline import run_skill_pipeline
 
+
 BATCH_SIZE = 10
 
 
 def start_worker():
 
-    print("=" * 60)
-    print("SKILL WORKER RUN")
-    print("=" * 60)
-
     result = run_skill_pipeline(
         batch_size=BATCH_SIZE
     )
 
-    print(result)
+    print("=" * 50)
+    print("SKILL WORKER REPORT")
+    print("=" * 50)
 
-    print("=" * 60)
-    print("SKILL WORKER FINISHED")
-    print("=" * 60)
+    print(f"Processed : {result['processed']}")
+    print(f"Completed : {result['completed']}")
+    print(f"Unavailable : {result['unavailable']}")
+    print(f"Failed : {result['failed']}")
+    print(f"Pending Remaining : {result['pending']}")
+
+    print("=" * 50)
 
     return result
 

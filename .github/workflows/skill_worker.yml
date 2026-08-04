@@ -6,39 +6,43 @@ on:
 
   workflow_dispatch:
 
-
 jobs:
 
   skill-worker:
 
     runs-on: ubuntu-latest
 
-
     steps:
 
       - name: Checkout repository
         uses: actions/checkout@v4
 
-
       - name: Setup Python
         uses: actions/setup-python@v5
-
         with:
           python-version: "3.12"
 
-
       - name: Install dependencies
         run: |
+          python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-
       - name: Run skill worker
+        id: worker
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
 
         run: |
-          python -m src.skills.skill_worker > worker_output.txt
+          REPORT=$(python -m src.skills.skill_worker)
+
+          echo "$REPORT"
+
+          {
+            echo "report<<EOF"
+            echo "$REPORT"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
 
       - name: Send Telegram notification
         if: always()
@@ -48,14 +52,8 @@ jobs:
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
 
         run: |
-
-          MESSAGE=$(tail -30 worker_output.txt)
-
-
           curl -s \
-          -X POST \
-          "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
-          -d chat_id=${TELEGRAM_CHAT_ID} \
-          -d text="Skill Worker Report:
-
-          ${MESSAGE}"
+            -X POST \
+            "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+            -d chat_id="${TELEGRAM_CHAT_ID}" \
+            --data-urlencode text="${{ steps.worker.outputs.report }}"
