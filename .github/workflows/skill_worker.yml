@@ -59,4 +59,4 @@ jobs:
           -d chat_id=${TELEGRAM_CHAT_ID} \
           -d text="Skill Worker Report:
 
-${MESSAGE}"
+          ${MESSAGE}"
