@@ -1,6 +1,7 @@
 # =====================================================
 # load_master_parquet.py
 # Load Adzuna Master Parquet Into Neon
+# With Pipeline Monitoring
 # =====================================================
 
 import pandas as pd
@@ -9,6 +10,7 @@ from sqlalchemy import text
 
 from src.database.connection import engine
 from src.utils.google_drive import download_parquet_dataframe
+from src.utils.pipeline_logger import PipelineLogger
 
 
 # =====================================================
@@ -17,7 +19,8 @@ from src.utils.google_drive import download_parquet_dataframe
 
 PARQUET_FILE = "uk_jobs_master.parquet"
 
-BATCH_SIZE = 100
+BATCH_SIZE = 500
+
 
 # =====================================================
 # Helpers
@@ -48,8 +51,7 @@ def calculate_average_salary(
                 +
                 float(salary_max)
             )
-            /
-            2
+            / 2
         )
 
     return None
@@ -66,7 +68,6 @@ def prepare_records(df):
 
 
     for _, row in df.iterrows():
-
 
         salary_min = clean_value(
             row.get("salary_min")
@@ -104,14 +105,12 @@ def prepare_records(df):
                 ),
 
 
-            # old column
             "category":
                 clean_value(
                     row.get("category_label")
                 ),
 
 
-            # old column
             "location":
                 clean_value(
                     row.get("location_display_name")
@@ -165,9 +164,7 @@ def prepare_records(df):
         }
 
 
-        records.append(
-            record
-        )
+        records.append(record)
 
 
     return records
@@ -187,31 +184,18 @@ def insert_records(records):
         (
 
             job_id,
-
             title,
-
             description,
-
             company_name,
-
             category,
-
             location,
-
             salary_min,
-
             salary_max,
-
             average_salary,
-
             first_seen_date,
-
             redirect_url,
-
             category_label,
-
             location_area,
-
             last_seen_date
 
         )
@@ -222,31 +206,18 @@ def insert_records(records):
         (
 
             :job_id,
-
             :title,
-
             :description,
-
             :company_name,
-
             :category,
-
             :location,
-
             :salary_min,
-
             :salary_max,
-
             :average_salary,
-
             :first_seen_date,
-
             :redirect_url,
-
             :category_label,
-
             :location_area,
-
             :last_seen_date
 
         )
@@ -255,7 +226,6 @@ def insert_records(records):
         ON CONFLICT (job_id)
 
         DO NOTHING
-
 
     """)
 
@@ -297,10 +267,8 @@ def insert_records(records):
                     connection.commit()
 
                     print(
-                        f"Inserted {index}/{len(records)}",
-                        flush=True
+                        f"Inserted {index}/{len(records)}"
                     )
-
 
 
             except Exception as e:
@@ -316,9 +284,7 @@ def insert_records(records):
                     record["job_id"]
                 )
 
-                print(
-                    e
-                )
+                print(e)
 
 
 
@@ -341,79 +307,132 @@ def insert_records(records):
 def main():
 
 
+    logger = PipelineLogger(
+        "Neon Jobs Loader"
+    )
+
+
     print("==============================")
     print("START MASTER PARQUET LOAD")
     print("==============================")
 
 
-    print(
-        "Reading parquet from Google Drive..."
-    )
+    try:
 
 
-    df = download_parquet_dataframe(
-        PARQUET_FILE
-    )
+        print(
+            "Reading parquet from Google Drive..."
+        )
 
 
-    print(
-        "Parquet rows:",
-        len(df)
-    )
+        df = download_parquet_dataframe(
+            PARQUET_FILE
+        )
+
+
+        print(
+            "Parquet rows:",
+            len(df)
+        )
+
+
+        logger.start(
+            source_rows=len(df)
+        )
+
+
+        print(
+            "Preparing records..."
+        )
+
+
+        records = prepare_records(
+            df
+        )
+
+
+        print(
+            "Prepared:",
+            len(records)
+        )
+
+
+        inserted, skipped, errors = insert_records(
+            records
+        )
 
 
 
-    print(
-        "Preparing records..."
-    )
+        if errors > 0:
 
 
-    records = prepare_records(
-        df
-    )
+            logger.finish(
+                status="FAILED",
+                inserted_rows=inserted,
+                skipped_rows=skipped,
+                error_count=errors,
+                error_message="Errors during Neon insert"
+            )
 
 
-    print(
-        "Prepared:",
-        len(records)
-    )
+        else:
+
+
+            logger.finish(
+                status="SUCCESS",
+                inserted_rows=inserted,
+                skipped_rows=skipped,
+                error_count=0
+            )
 
 
 
-    inserted, skipped, errors = insert_records(
-        records
-    )
+        print()
+
+        print("==============================")
+        print("LOAD RESULTS")
+        print("==============================")
+
+
+        print(
+            "Inserted:",
+            inserted
+        )
+
+
+        print(
+            "Skipped:",
+            skipped
+        )
+
+
+        print(
+            "Errors:",
+            errors
+        )
+
+
+        print("==============================")
+        print("MASTER PARQUET LOAD FINISHED")
+        print("==============================")
 
 
 
-    print()
-
-    print("==============================")
-    print("LOAD RESULTS")
-    print("==============================")
+    except Exception as e:
 
 
-    print(
-        "Inserted:",
-        inserted
-    )
+        logger.finish(
+
+            status="FAILED",
+
+            error_count=1,
+
+            error_message=str(e)
+
+        )
 
 
-    print(
-        "Skipped:",
-        skipped
-    )
-
-
-    print(
-        "Errors:",
-        errors
-    )
-
-
-    print("==============================")
-    print("MASTER PARQUET LOAD FINISHED")
-    print("==============================")
+        raise e
 
 
 
