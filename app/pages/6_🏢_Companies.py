@@ -13,7 +13,7 @@ st.set_page_config(
 )
 
 
-@st.cache_data
+# @st.cache_data
 def load_data(query):
 
     engine = get_connection()

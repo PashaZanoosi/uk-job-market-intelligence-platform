@@ -29,11 +29,6 @@ df = load_data(
     FORECASTING_MARKET_TREND_QUERY
 )
 
-st.write(df.columns)
-st.write(
-    df[df["skill_name"].str.contains("31 days", case=False, na=False)]
-)
-
 
 # -----------------------------
 # Data Cleaning
