@@ -14,7 +14,7 @@ st.set_page_config(
 )
 
 
-@st.cache_data
+# @st.cache_data
 def load_data(query):
 
     engine = get_connection()
@@ -27,6 +27,11 @@ def load_data(query):
 
 df = load_data(
     FORECASTING_MARKET_TREND_QUERY
+)
+
+st.write(df.columns)
+st.write(
+    df[df["skill_name"].str.contains("31 days", case=False, na=False)]
 )
 
 
