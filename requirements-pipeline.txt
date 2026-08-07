@@ -51,7 +51,7 @@ pyasn1==0.6.4
 pyasn1_modules==0.4.2 
 pycparser==3.0 
 pydantic==2.13.4
-ydantic_core==2.46.4 
+pydantic_core==2.46.4 
 pydeck==0.9.3 
 pyparsing==3.3.2 
 python-dateutil==2.9.0.post0 
