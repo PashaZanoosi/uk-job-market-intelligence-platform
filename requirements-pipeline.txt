@@ -20,7 +20,6 @@ google-api-core==2.33.0
 google-api-python-client==2.198.0 
 google-auth==2.56.2 
 google-auth-httplib2==0.4.0 
-google-auth-oauthlib==1.4.0 
 googleapis-common-protos==1.75.0 
 greenlet==3.5.4 
 groq==1.5.0 
@@ -80,9 +79,3 @@ uvicorn==0.51.0
 watchdog==6.0.0 
 websockets==16.1.1 
 google-auth-oauthlib==1.2.2
-streamlit 
-pandas 
-sqlalchemy 
-psycopg2-binary 
-plotly 
-geopy
