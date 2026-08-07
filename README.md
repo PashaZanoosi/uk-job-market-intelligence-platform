@@ -20,7 +20,7 @@ The platform continuously gathers job advertisements, stores them in PostgreSQL,
 - Automated ETL pipeline
 - PostgreSQL (Neon) cloud database
 - AI-assisted skill extraction
-- UK labour market dashboards
+- UK job market dashboards
 - Salary analysis
 - Skills demand analysis
 - Company insights
@@ -87,6 +87,13 @@ The dashboard contains several interactive pages.
 - Hiring activity
 
 ---
+## Power BI Dashboard
+
+Power BI dashboard for analysing UK job market trends.
+
+![Power BI Dashboard](powerbi/dashboard-preview.png)
+
+---
 
 ## Data Pipeline
 
@@ -117,7 +124,7 @@ README.md
 ## Future Improvements
 
 - Demand forecasting using Time Series and Machine Learning
-- AI-powered labour market recommendations
+- AI-powered job market recommendations
 - Resume-to-job matching
 - Skill gap analysis
 - LLM-powered career assistant
