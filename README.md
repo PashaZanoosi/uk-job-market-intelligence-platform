@@ -1,128 +1,129 @@
 # UK Job Market Intelligence Platform
 
-An end-to-end UK job market analytics platform that collects, processes, enriches, and analyses job market data using Python, SQL, AI, Power BI, and Streamlit.
+AI-driven job market intelligence platform that automatically collects, processes and analyses UK job market data to provide actionable insights into salaries, skills demand, regional hiring trends and employer activity.
 
-The project transforms raw job listings into actionable insights about job demand, skills, salaries, locations, companies, and market trends.
+Live dashboard:
+https://uk-job-market.streamlit.app/
 
-## Business Problem
+---
 
-Job market data is large, unstructured, and constantly changing. Job descriptions contain inconsistent titles, locations, salary formats, and skill requirements, making analysis difficult.
+## Overview
 
-This project solves this by building an automated analytics pipeline that converts raw job data into structured business intelligence.
+This project was built to demonstrate an end-to-end analytics workflow, from automated data collection through ETL pipelines to interactive business intelligence dashboards.
 
-## Solution Overview
+The platform continuously gathers job advertisements, stores them in PostgreSQL, enriches them using AI-assisted skill extraction, and presents insights through an interactive Streamlit application.
 
-The platform workflow:
+---
 
-```
-Adzuna API
-      ↓
-Python Data Collection Pipeline
-      ↓
-PostgreSQL Database (Neon)
-      ↓
-AI Skill Extraction \& Classification
-      ↓
-Analytics Data Layer
-      ↓
-Power BI Dashboard + Streamlit Application
-```
+## Features
 
-## Key Features
+- Automated ETL pipeline
+- PostgreSQL (Neon) cloud database
+- AI-assisted skill extraction
+- UK labour market dashboards
+- Salary analysis
+- Skills demand analysis
+- Company insights
+- Regional hiring trends
+- Interactive maps
+- Time-series trend analysis
 
-### Data Engineering
-
-* Automated job data collection from Adzuna API
-* Data cleaning and transformation pipeline
-* PostgreSQL database modelling
-* Snapshot-based historical tracking
-
-### AI-Powered Analysis
-
-* AI extraction of skills from job descriptions
-* Skill categorisation using LLM models
-* Automated market insight generation
-* Skill demand analysis
-
-### Business Intelligence
-
-Interactive dashboards covering:
-
-* Job demand by location
-* Salary analysis
-* Skill popularity and trends
-* Market insights
-* Job pipeline performance
+---
 
 ## Technology Stack
 
-### Data \& Analytics
+Python
 
-* Python
-* SQL
-* PostgreSQL
-* Pandas
-* SQLAlchemy
+SQL
 
-### AI
+PostgreSQL (Neon)
 
-* Groq API
-* LLM-based skill extraction
-* Automated insight generation
+Streamlit
 
-### Visualisation
+Power BI
 
-* Power BI
-* Streamlit
-* PyDeck
+Plotly
 
-### Data Source
+GitHub Actions
 
-* Adzuna Job Search API
+Git
+
+---
+
+## Dashboard
+
+The dashboard contains several interactive pages.
+
+### Overview
+
+- Job market summary
+- Top skills
+- Job categories
+
+### Skills
+
+- Most demanded skills
+- Salary by skill
+- Skills by category
+
+### Explorer
+
+- Regional hiring map
+- Job explorer
+- Skills explorer
+
+### Network
+
+- Company–skill relationships
+
+### Market Trends
+
+- Time-series analysis
+- Skills trends
+
+### Companies
+
+- Company insights
+- Hiring activity
+
+---
+
+## Data Pipeline
+
+The project automatically
+
+1. Collects UK job advertisements
+2. Cleans and standardises the data
+3. Stores structured data in PostgreSQL
+4. Extracts skills using AI
+5. Updates analytical views
+6. Serves dashboards through Streamlit
+
+---
 
 ## Project Structure
 
-```
-uk-job-market-intelligence/
-│
-├── app/
-│   ├── pages/
-│   └── utils/
-│
-├── src/
-│   ├── ai/
-│   ├── analytics/
-│   ├── data/
-│   ├── database/
-│   └── utils/
-│
-├── sql/
-│
-├── powerbi/
-│
-├── run\_pipeline.py
-│
-└── README.md
+```text
+app/
+src/
+powerbi/
+requirements.txt
+requirements-pipeline.txt
+README.md
 ```
 
-## Outputs
-
-The platform delivers:
-
-* Interactive Streamlit analytics application
-* Power BI executive dashboard
-* AI-generated market reports
-* Structured job and skill intelligence database
-
-## Business Value
-
-This project demonstrates how data engineering, AI automation, and business intelligence can be combined to create a repeatable decision-support system for labour market analysis.
+---
 
 ## Future Improvements
 
-* Real-time job market monitoring
-* Automated dashboard refresh
-* Improved skill taxonomy coverage
-* Advanced forecasting models
-* Cloud deployment
+- Demand forecasting using Time Series and Machine Learning
+- AI-powered labour market recommendations
+- Resume-to-job matching
+- Skill gap analysis
+- LLM-powered career assistant
 
+---
+
+## Author
+
+Aliakbar Pashazanoosi
